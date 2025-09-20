@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException, APIRouter
 from sqlalchemy.orm import Session
-from ..database import Base, engine, get_db, create_table
+from ..database import Base, engine, get_db
 from ..models import Student, Teacher, Course, Classroom, Assignment, student_course
 from typing import List
 from .. import schemas
