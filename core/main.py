@@ -5,9 +5,19 @@ from .routers import classroom, course, teacher, student
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from . import schemas
+from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI(title="School Management System")
 # create_table()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://v0.app"],  # Add this domain
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 app.include_router(student.router)
 app.include_router(teacher.router)
