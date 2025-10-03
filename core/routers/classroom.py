@@ -15,7 +15,7 @@ def get_classrooms(db: Session = Depends(get_db)):
     return classrooms
 
 #add a classroom
-@router.post("/", response_model= schemas.ClassroomResponse)
+@router.post("/", response_model= schemas.ClassroomCreate)
 def add_student(request:schemas.ClassroomCreate, db:Session = Depends(get_db)):
     new_classroom = Classroom(room_number=request.room_number, course_id= request.course_id, name = request.name)
     db.add(new_classroom)

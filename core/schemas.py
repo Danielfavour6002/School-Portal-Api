@@ -1,102 +1,153 @@
 from pydantic import BaseModel
 from typing import List, Optional
 
-#STUDENTS
-class StudentB(BaseModel):
+# ---------------------------
+# STUDENTS
+# ---------------------------
+class StudentBase(BaseModel):
+    id: int                           # ✅ unique identifier
     name: str
-    email : str
-     
+    email: str
 
-class StudentBase(StudentB):
+    class Config:
+        from_attributes = True        # ✅ allows ORM objects → schema
+
+
+class StudentCreate(BaseModel):
     name: str
-    email : str
-    courses : Optional[List["Course"]] = []
-    class config():
-        from_attributes = True
-class StudentWithCourses(StudentB):
-    courses : Optional[List["CourseBase"]] = []
-   
-class Student(StudentB):
-    password: str
+    email: str
+    password: str                     # ✅ password only used at creation
+
+
+class StudentResponse(StudentBase):
+    courses: Optional[List["CourseBase"]] = []  # forward ref → needs rebuild
+
 
 class StudentLogin(BaseModel):
-    email : str
-    password : str
-class StudentToken(BaseModel):
-    access_token : str
-    token_type  :str
-    
-#TEACHERS
-class TeacherBase(BaseModel):
-    name: str
-    email : str
+    email: str
+    password: str
 
-class Teacher(TeacherBase):
-    password : str
+
+class StudentToken(BaseModel):
+    access_token: str
+    token_type: str
+
+
+# ---------------------------
+# TEACHERS
+# ---------------------------
+class TeacherBase(BaseModel):
+    id: int
+    name: str
+    email: str
+
+    class Config:
+        from_attributes = True
+
+
+class TeacherCreate(BaseModel):
+    name: str
+    email: str
+    password: str
+
 
 class TeacherResponse(TeacherBase):
-    courses_taught : Optional[List["CourseBase"]] = []
+    courses_taught: Optional[List["CourseBase"]] = []
 
-#COURSE
+
+# ---------------------------
+# COURSES
+# ---------------------------
 class CourseBase(BaseModel):
-    title : str
-    description : str
+    id: int
+    title: str
+    description: str
 
-class CourseCreate(CourseBase):
-    password : str
-    teacher_id : int
-
-class Course(CourseBase):
-    teacher : Optional["TeacherBase"]
-    students : Optional[List["StudentB"]] = []
-    #probable error
-    classroom : Optional["ClassroomResponse"]
-    assignment : Optional[List["AssignmentBase"]] = []
-    class config():
+    class Config:
         from_attributes = True
 
-class CourseWithStudent(CourseBase):
-    students : Optional[List["StudentB"]] = []
 
-#ASSIGNMENT
+class CourseCreate(BaseModel):
+    title: str
+    description: str
+    teacher_id: int
+
+
+class CourseResponse(CourseBase):
+    teacher: Optional["TeacherBase"]
+    students: Optional[List["StudentBase"]] = []
+    classroom: Optional["ClassroomResponse"]
+    assignments: Optional[List["AssignmentResponse"]] = []
+
+class CourseStudentsResponse(BaseModel):
+    course_id: int
+    course_title: str
+    students: List[StudentBase]
+
+    class Config:
+        from_attributes = True
+
+
+# ---------------------------
+# ASSIGNMENTS
+# ---------------------------
 class AssignmentBase(BaseModel):
-    course_id : Optional[CourseBase]
-    student_id : Optional[StudentB]
-    question : str
-    answer : str
+    id: int
+    question: str
+    answer: str
+
+    class Config:
+        from_attributes = True
+
+
+class AssignmentCreate(BaseModel):
+    course_id: int
+    student_id: int
+    question: str
+    answer: str
+
 
 class AssignmentResponse(AssignmentBase):
-    class config():
-        from_attributes = True
+    course: Optional["CourseBase"]
+    student: Optional["StudentBase"]
 
-#CLASSROOM
+
+# ---------------------------
+# CLASSROOM
+# ---------------------------
 class ClassroomCreate(BaseModel):
-    room_number:int
+    room_number: int
     course_id: int
-    name : str
-    
-    
-class ClassroomResponse(ClassroomCreate):
-    
-    class config():
+    name: str
+
+
+class ClassroomResponse(BaseModel):
+    id: int
+    room_number: int
+    course_id: int
+    name: str
+
+    class Config:
         from_attributes = True
 
-# class EnrollBase(BaseModel):
-#     student_id : int
-    
 
+# ---------------------------
+# ENROLLMENT
+# ---------------------------
 class EnrollResponse(BaseModel):
     message: str
-    student: StudentB
+    student: StudentBase
     course: CourseBase
 
     class Config:
         from_attributes = True
 
 
-
-# 🔑 Call rebuild at the end
-StudentBase.model_rebuild()
+# ---------------------------
+# Rebuild Forward References
+# ---------------------------
+StudentResponse.model_rebuild()
 TeacherResponse.model_rebuild()
-Course.model_rebuild()
+CourseResponse.model_rebuild()
+AssignmentResponse.model_rebuild()
 ClassroomResponse.model_rebuild()
