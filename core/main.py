@@ -10,7 +10,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 
 
-app = FastAPI(title="School Management System")
+app = FastAPI(
+    title="School Management System",
+    servers=[
+        {"url" : "http://127.0.0.1:8000", "description": "Local server"},
+        {"url" : "https://school-portal-api-ll9w.onrender.com/", "description": "prod server"},
+        
+    ])
+
 # create_table()
 app.add_middleware(
     CORSMiddleware,
