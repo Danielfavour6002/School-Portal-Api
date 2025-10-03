@@ -1,11 +1,13 @@
 from fastapi import FastAPI, Depends
 from typing import Annotated
-
+from sqlalchemy.orm import Session
+from .database import get_db
 from .routers import classroom, course, teacher, student
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from . import schemas
 from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime
 
 
 app = FastAPI(title="School Management System")
@@ -52,5 +54,21 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
 async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]):
     return current_user
 
+@app.get("/dashboard", response_model=schemas.Dashboard)
+def dashboard(db:Session=Depends(get_db)):
+    students = db.query(student).all()
+    teachers = db.query(teacher).all()
+    courses = db.query(course).all()
+    classrooms = db.query(classroom).all()
+    return schemas.Dashboard(
+        students=len(students),
+        teachers=len(teachers),
+        courses=len(courses),
+        classrooms=len(classrooms)
+    )
+
+@app.get("/health")
+def health_check():
+    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
 #allocation
 #assignment
