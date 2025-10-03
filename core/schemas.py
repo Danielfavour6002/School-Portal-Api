@@ -1,57 +1,76 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import List, Optional
-
-# ---------------------------
-# STUDENTS
-# ---------------------------
-class StudentBase(BaseModel):
-    id: int                           # ✅ unique identifier
-    name: str
-    email: str
-
-    class Config:
-        from_attributes = True        # ✅ allows ORM objects → schema
-
-
-class StudentCreate(BaseModel):
-    name: str
-    email: str
-    password: str                     # ✅ password only used at creation
-
-
-class StudentResponse(StudentBase):
-    courses: Optional[List["CourseBase"]] = []  # forward ref → needs rebuild
-
-
-class StudentLogin(BaseModel):
-    email: str
-    password: str
-
-
-class StudentToken(BaseModel):
-    access_token: str
-    token_type: str
+from enum import Enum
 
 
 # ---------------------------
-# TEACHERS
+# ROLES
 # ---------------------------
-class TeacherBase(BaseModel):
+class RoleEnum(str, Enum):
+    student = "student"
+    teacher = "teacher"
+    admin = "admin"
+
+
+# ---------------------------
+# USER (Authentication layer)
+# ---------------------------
+class UserBase(BaseModel):
     id: int
     name: str
-    email: str
+    email: EmailStr
+    role: RoleEnum
 
     class Config:
         from_attributes = True
 
 
-class TeacherCreate(BaseModel):
+class UserCreate(BaseModel):
     name: str
-    email: str
+    email: EmailStr
+    password: str
+    role: RoleEnum
+
+
+class UserLogin(BaseModel):
+    email: EmailStr
     password: str
 
 
-class TeacherResponse(TeacherBase):
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+# ---------------------------
+# STUDENT PROFILE
+# ---------------------------
+class StudentProfileBase(BaseModel):
+    id: int
+    user_id: int
+
+    class Config:
+        from_attributes = True
+
+
+class StudentProfileResponse(StudentProfileBase):
+    user: UserBase
+    courses: Optional[List["CourseBase"]] = []
+
+
+# ---------------------------
+# TEACHER PROFILE
+# ---------------------------
+class TeacherProfileBase(BaseModel):
+    id: int
+    user_id: int
+
+    class Config:
+        from_attributes = True
+
+
+class TeacherProfileResponse(TeacherProfileBase):
+    user: UserBase
     courses_taught: Optional[List["CourseBase"]] = []
 
 
@@ -74,15 +93,16 @@ class CourseCreate(BaseModel):
 
 
 class CourseResponse(CourseBase):
-    teacher: Optional["TeacherBase"]
-    students: Optional[List["StudentBase"]] = []
+    teacher: Optional["TeacherProfileResponse"]
+    students: Optional[List["StudentProfileResponse"]] = []
     classroom: Optional["ClassroomResponse"]
     assignments: Optional[List["AssignmentResponse"]] = []
+
 
 class CourseStudentsResponse(BaseModel):
     course_id: int
     course_title: str
-    students: List[StudentBase]
+    students: List[StudentProfileResponse]
 
     class Config:
         from_attributes = True
@@ -109,7 +129,7 @@ class AssignmentCreate(BaseModel):
 
 class AssignmentResponse(AssignmentBase):
     course: Optional["CourseBase"]
-    student: Optional["StudentBase"]
+    student: Optional["StudentProfileResponse"]
 
 
 # ---------------------------
@@ -136,7 +156,7 @@ class ClassroomResponse(BaseModel):
 # ---------------------------
 class EnrollResponse(BaseModel):
     message: str
-    student: StudentBase
+    student: StudentProfileResponse
     course: CourseBase
 
     class Config:
@@ -144,10 +164,20 @@ class EnrollResponse(BaseModel):
 
 
 # ---------------------------
+# DASHBOARD
+# ---------------------------
+class Dashboard(BaseModel):
+    students: int
+    teachers: int
+    courses: int
+    classrooms: int
+
+
+# ---------------------------
 # Rebuild Forward References
 # ---------------------------
-StudentResponse.model_rebuild()
-TeacherResponse.model_rebuild()
+StudentProfileResponse.model_rebuild()
+TeacherProfileResponse.model_rebuild()
 CourseResponse.model_rebuild()
 AssignmentResponse.model_rebuild()
 ClassroomResponse.model_rebuild()

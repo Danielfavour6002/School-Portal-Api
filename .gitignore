@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+
+# Virtual environment
+venv/
+env/
+school_venv/
+*.egg-info/
+.eggs/
+
+# IDEs & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment variables
+.env
+.env.*
+
+# Alembic
+alembic.ini
+alembic/versions/*.pyc
+alembic/__pycache__/
+
+# Logs
+*.log
+*.out
+*.err
+
+# Cache
+.cache/
+.pytest_cache/
+.mypy_cache/
+
+# OS files
+.DS_Store
+Thumbs.db

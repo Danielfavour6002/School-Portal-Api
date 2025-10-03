@@ -5,7 +5,7 @@ from .database import get_db
 from .routers import classroom, course, teacher, student
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
-from . import schemas
+from . import schemas, models
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 
@@ -55,17 +55,22 @@ async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]
     return current_user
 
 @app.get("/dashboard", response_model=schemas.Dashboard)
-def dashboard(db:Session=Depends(get_db)):
-    students = db.query(student).all()
-    teachers = db.query(teacher).all()
-    courses = db.query(course).all()
-    classrooms = db.query(classroom).all()
+def dashboard(db: Session = Depends(get_db)):
+    # Assuming your User model has a 'role' field (e.g., "student", "teacher")
+    students = db.query(models.User).filter(models.User.role == "student").count()
+    teachers = db.query(models.User).filter(models.User.role == "teacher").count()
+    
+    # Other tables remain the same
+    courses = db.query(models.Course).count()
+    classrooms = db.query(models.Classroom).count()
+    
     return schemas.Dashboard(
-        students=len(students),
-        teachers=len(teachers),
-        courses=len(courses),
-        classrooms=len(classrooms)
+        students=students,
+        teachers=teachers,
+        courses=courses,
+        classrooms=classrooms
     )
+
 
 @app.get("/health")
 def health_check():
