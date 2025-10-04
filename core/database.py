@@ -9,6 +9,7 @@ if not DATABASE_URL:
     raise ValueError("DATABASE_URL is not set!")
 
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+print(f"--- 🛑 CHECKING DATABASE_URL: {DATABASE_URL}")
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 
 class Base(DeclarativeBase):
