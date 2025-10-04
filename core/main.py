@@ -13,7 +13,7 @@ from datetime import datetime
 app = FastAPI(
     title="School Management System",
     servers=[
-        {"url" : "http://127.0.0.1:8000", "description": "Local server"},
+        {"url" : "http://127.0.0.1:8001", "description": "Local server"},
         {"url" : "https://school-portal-api-ll9w.onrender.com/", "description": "prod server"},
         
     ])
@@ -21,11 +21,12 @@ app = FastAPI(
 # create_table()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://v0.app"],  # Add this domain
+    allow_origins=["https://v0.app", ],  # Add this domain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 
 app.include_router(student.router)
