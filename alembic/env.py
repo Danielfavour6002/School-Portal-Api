@@ -38,20 +38,12 @@ target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:
-    """Run migrations in 'offline' mode.
-
-    This configures the context with just a URL
-    and not an Engine, though an Engine is acceptable
-    here as well.  By skipping the Engine creation
-    we don't even need a DBAPI to be available.
-
-    Calls to context.execute() here emit the given string to the
-    script output.
-
-    """
-    url = config.get_main_option("sqlalchemy.url")
+    """Run migrations in 'offline' mode."""
+    # Remove this line - it tries to read from config
+    # url = config.get_main_option("sqlalchemy.url")
+    
     context.configure(
-        url=DATABASE_URL,
+        url=DATABASE_URL,  # This is already correct ✅
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -68,9 +60,11 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
+    # Create engine directly from DATABASE_URL, not from config
+    from sqlalchemy import create_engine
+    
+    connectable = create_engine(
+        DATABASE_URL,  # Use the environment variable directly
         poolclass=pool.NullPool,
     )
 
@@ -81,9 +75,3 @@ def run_migrations_online() -> None:
 
         with context.begin_transaction():
             context.run_migrations()
-
-
-if context.is_offline_mode():
-    run_migrations_offline()
-else:
-    run_migrations_online()
