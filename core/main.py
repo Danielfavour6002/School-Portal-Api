@@ -8,7 +8,14 @@ from pydantic import BaseModel
 from . import schemas, models
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
+import os
+from dotenv import load_dotenv
+load_dotenv()
+DATABASE_URL = os.getenv("DATABASE_URL")
 
+
+
+print(f"--- 🛑 CHECKING DATABASE_URL: {DATABASE_URL}")
 
 app = FastAPI(
     title="School Management System",
@@ -21,7 +28,7 @@ app = FastAPI(
 # create_table()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://v0.app", ],  # Add this domain
+    allow_origins=["*", ],  # Add this domain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
