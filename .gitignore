@@ -20,8 +20,8 @@ school_venv/
 *.swo
 
 # Environment variables
-.env
-.env.*
+# .env
+# .env.*
 
 # Alembic
 alembic.ini
